@@ -1,42 +1,47 @@
-import { useRef, useState } from "react";
+import React from "react";
+import { useState } from "react";
+import Button from "./Button";
 
-const AddFriendForm = ({ setFriends }) => {
-  const [imgRef, setImgRef] = useState("https://i.pravatar.cc/48");
-  const nameRef = useRef();
-  // const imgRef = useRef();
-  function addFriend(e) {
-    e.preventDefault();
-    let refNameVal = nameRef.current.value;
-    let ImgVal = imgRef;
-    if (!refNameVal || !imgRef) return;
+const AddFriendForm = ({ setFriends, setShowAddFriendForm }) => {
+  const [nameInput, setNameInput] = useState("");
+  const [imgInput, setImgInput] = useState("https://i.pravatar.cc/48");
 
-    setFriends((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        name: refNameVal,
-        image: imgRef,
-        balance: 0,
-      },
-    ]);
-    nameRef.current.value = "";
-    setImgRef("https://i.pravatar.cc/48");
-  }
   return (
-    <form className="form-add-friend" onSubmit={addFriend}>
-      <label>Friend Name</label>
-      <input type="text" ref={nameRef} />
-
-      <label>Image Url</label>
+    <form
+      className="form-add-friend"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!nameInput || !imgInput) return;
+        let id = crypto.randomUUID();
+        const newFriend = {
+          id: id,
+          name: nameInput,
+          image: `https://i.pravatar.cc/48?u=${id}`,
+          balance: 0,
+        };
+        setFriends((prev) => {
+          return [...prev, newFriend];
+        });
+        setNameInput("");
+        setImgInput("https://i.pravatar.cc/48");
+        setShowAddFriendForm(false);
+      }}
+    >
+      <label htmlFor="name">Friend Name</label>
       <input
         type="text"
-        value={imgRef}
-        onChange={(e) => setImgRef(e.target.value)}
+        value={nameInput}
+        onChange={(e) => setNameInput(e.target.value)}
       />
-      <button type="submit" className="button">
-        Add
-      </button>
+      <label htmlFor="image">Image Url</label>
+      <input
+        type="text"
+        value={imgInput}
+        onChange={(e) => setImgInput(e.target.value)}
+      />
+      <Button>add</Button>
     </form>
   );
 };
+
 export default AddFriendForm;

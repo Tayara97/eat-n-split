@@ -1,49 +1,82 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Button from "./Button.jsx";
-const SplitBillForm = ({ selectedFriend, handleSplitForm }) => {
+
+const SplitBillForm = ({ setFriends, selectedFriend, setShowSplitForm }) => {
   const [bill, setBill] = useState("");
   const [paidByUser, setPaidByUser] = useState("");
-  const paidByfriend = bill - paidByUser;
-  const [whoIsPaing, setWhoIsPaying] = useState("user");
-
-  const onSubmitForm = (e) => {
+  const paidByFriend = bill - paidByUser;
+  const [whoisPaying, setWhoIsPaying] = useState("user");
+  const [error, setError] = useState(false);
+  console.log(error);
+  const handleSplitForm = (e) => {
     e.preventDefault();
-    if (!bill || !paidByUser) return;
-    if (whoIsPaing === "user") {
-      handleSplitForm(paidByfriend);
-    } else {
-      handleSplitForm(-paidByUser);
+    if (!bill || !paidByUser) {
+      setError(true);
+      return;
     }
-    setBill("");
-    setPaidByUser("");
+    if (paidByUser > bill) {
+      alert("Your expense can't exceed the bill value!");
+      return;
+    }
+    if (whoisPaying === "user") {
+      setFriends((prev) => {
+        return prev.map((friend) => {
+          return friend.id === selectedFriend?.id
+            ? { ...friend, balance: friend.balance + paidByFriend }
+            : friend;
+        });
+      });
+    } else {
+      setFriends((prev) => {
+        return prev.map((friend) => {
+          return friend.id === selectedFriend?.id
+            ? { ...friend, balance: friend.balance + -paidByUser }
+            : friend;
+        });
+      });
+    }
+    setShowSplitForm(false);
   };
   return (
-    <form className="form-split-bill" onSubmit={onSubmitForm}>
-      <h2>Split the bill with {selectedFriend.name} </h2>
-      <label>Bill Value</label>
+    <form className="form-split-bill" onSubmit={(e) => handleSplitForm(e)}>
+      <h2>Split form with {selectedFriend.name}</h2>
+      <label htmlFor="">
+        Bill Value
+        {error && !bill ? (
+          <span className="error">{`This field can't be empty`}</span>
+        ) : (
+          ""
+        )}
+      </label>
       <input
-        type="text"
+        type="number"
         value={bill}
-        onChange={(e) => setBill(Number(e.target.value))}
+        onChange={(e) => setBill(Math.abs(e.target.value))}
       />
 
-      <label>My Expense</label>
+      <label htmlFor="">
+        My Expense
+        {error && !paidByUser ? (
+          <span className="error">{`This field can't be empty`}</span>
+        ) : (
+          ""
+        )}
+      </label>
       <input
-        type="text"
+        type="number"
         value={paidByUser}
-        onChange={(e) =>
-          setPaidByUser(
-            Number(e.target.value) > bill ? paidByUser : Number(e.target.value)
-          )
-        }
+        onChange={(e) => {
+          return setPaidByUser(
+            e.target.value > bill ? bill : Math.abs(e.target.value)
+          );
+        }}
       />
 
-      <label>{selectedFriend.name}'s Value</label>
-      <input type="text" disabled value={paidByfriend} />
-
-      <label>Who is paying the bill</label>
+      <label htmlFor="">Friend's Value</label>
+      <input type="number" disabled value={paidByFriend} />
+      <label htmlFor="">Who is paying the bill</label>
       <select
-        value={whoIsPaing}
+        value={whoisPaying}
         onChange={(e) => setWhoIsPaying(e.target.value)}
       >
         <option value="user">You</option>
