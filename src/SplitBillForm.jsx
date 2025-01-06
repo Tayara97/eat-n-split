@@ -7,7 +7,6 @@ const SplitBillForm = ({ setFriends, selectedFriend, setShowSplitForm }) => {
   const paidByFriend = bill - paidByUser;
   const [whoisPaying, setWhoIsPaying] = useState("user");
   const [error, setError] = useState(false);
-  console.log(error);
   const handleSplitForm = (e) => {
     e.preventDefault();
     if (!bill || !paidByUser) {
